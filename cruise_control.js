@@ -2,7 +2,7 @@
 // @name        Internet Roadtrip Cruise Control
 // @namespace   spideramn.github.io
 // @match       https://neal.fun/internet-roadtrip/*
-// @version     0.0.1
+// @version     0.0.2
 // @author      Spideramn
 // @description Internet Roadtrip Cruise Control.
 // @license     MIT
@@ -31,7 +31,7 @@
     const odometer = await IRF.vdom.odometer;
     const container = await IRF.vdom.container;
 
-    class cruiseControl
+    class CruiseControl
     {
         async setup()
         {
@@ -71,27 +71,27 @@
     };
 
     // Speedometer
-    class speedOmeterControl
+    class SpeedOmeterControl
     {
         _queue = [];
         _speedOmeterContainer = undefined;
         _speedOmeterElement = undefined;
         _gauge = undefined;
 
-        addDistance(dinstanceInMiles)
+        addDistance(distanceInMiles)
         {
             // prevent duplicate distances
             if(this._queue.length > 0)
             {
                 const lastDistance = this._queue[this._queue.length - 1].distance;
-                if(dinstanceInMiles == lastDistance)
+                if(distanceInMiles == lastDistance)
                 {
                     this.update();
                     return;
                 }
             }
 
-            this._queue.push({time: Date.now(), distance: dinstanceInMiles});
+            this._queue.push({time: Date.now(), distance: distanceInMiles});
             if (this._queue.length > 15)
             {
                 this._queue.shift();
@@ -197,10 +197,10 @@
                     return;
                 }
 
-                const totalDistance = this._queue[this._queue.length - 1].distance - this._queue[0].distance;
-                const totalTime = this._queue[this._queue.length - 1].time - this._queue[0].time;
-                const totalTimeInHours = totalTime / (1000 * 60 * 60);
-                let speed = totalDistance / totalTimeInHours; // mph
+                const lastItem = this._queue[this._queue.length - 1];
+                const firstItem = this._queue[0];
+                const timeInHours = (lastItem.time - firstItem.time) / (1000 * 60 * 60);
+                let speed = (lastItem.distance - firstItem.distance) / timeInHours; // in mph
                 if(odometer.data.isKilometers)
                 {
                     speed *= odometer.data.conversionFactor;
@@ -264,9 +264,9 @@
         return checkbox
     };
 
-    const speedOmeter = new speedOmeterControl();
+    const speedOmeter = new SpeedOmeterControl();
     await speedOmeter.setup();
 
-    const cruiseControlInstance = new cruiseControl();
+    const cruiseControlInstance = new CruiseControl();
     await cruiseControlInstance.setup();
 })();
