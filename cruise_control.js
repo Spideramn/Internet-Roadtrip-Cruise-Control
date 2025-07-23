@@ -2,7 +2,7 @@
 // @name        Internet Roadtrip Cruise Control
 // @namespace   spideramn.github.io
 // @match       https://neal.fun/internet-roadtrip/*
-// @version     0.0.2
+// @version     0.0.3
 // @author      Spideramn
 // @description Internet Roadtrip Cruise Control.
 // @license     MIT
@@ -108,6 +108,7 @@
 	position: absolute;
 	top: 10%;
 	left: 15%;
+    visibility: hidden;
 }
 .speedOmeterContainer canvas{
     position: absolute;
