@@ -2,12 +2,13 @@
 // @name        Internet Roadtrip Cruise Control
 // @namespace   spideramn.github.io
 // @match       https://neal.fun/internet-roadtrip/*
-// @version     0.0.4
+// @version     0.0.5
 // @author      Spideramn
 // @description Internet Roadtrip Cruise Control.
 // @license     MIT
 // @grant       GM.setValues
 // @grant       GM.getValues
+// @run-at      document-start
 // @icon        https://neal.fun/favicons/internet-roadtrip.png
 // @require     https://cdn.jsdelivr.net/npm/internet-roadtrip-framework@0.4.1-beta
 // ==/UserScript==
@@ -20,7 +21,8 @@
   */
 
 (async function() {
-
+    'use strict';
+    
     if (!IRF?.isInternetRoadtrip) {
         return;
     }
