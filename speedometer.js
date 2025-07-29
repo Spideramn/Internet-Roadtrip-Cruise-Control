@@ -2,7 +2,7 @@
 // @name        Internet Roadtrip Speedometer
 // @namespace   spideramn.github.io
 // @match       https://neal.fun/internet-roadtrip/*
-// @version     0.0.2
+// @version     0.0.3
 // @author      Spideramn
 // @description Internet Roadtrip Speedometer.
 // @license     MIT
@@ -196,7 +196,7 @@
     //
     // Settings
     const settings = {
-        "speedometer_enabled": false,
+        "speedometer_enabled": true,
         "speedometer_scale": 1.0,
         "speedometer_left": 35,
         "speedometer_top": 30,
