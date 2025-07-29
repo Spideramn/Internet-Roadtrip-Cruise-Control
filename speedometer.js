@@ -2,13 +2,14 @@
 // @name        Internet Roadtrip Speedometer
 // @namespace   spideramn.github.io
 // @match       https://neal.fun/internet-roadtrip/*
-// @version     0.0.1
+// @version     0.0.2
 // @author      Spideramn
 // @description Internet Roadtrip Speedometer.
 // @license     MIT
 // @grant       GM.addStyle
 // @grant       GM.setValues
 // @grant       GM.getValues
+// @run-at      document-start
 // @icon        https://neal.fun/favicons/internet-roadtrip.png
 // @require     https://cdn.jsdelivr.net/npm/internet-roadtrip-framework@0.4.1-beta
 // @require     https://cdnjs.cloudflare.com/ajax/libs/gauge.js/1.3.9/gauge.min.js
@@ -22,6 +23,7 @@
   */
 
 (async function() {
+    'use strict';
 
     if (!IRF?.isInternetRoadtrip) {
         return;
@@ -29,6 +31,7 @@
 
     // Get map methods and various objects
     const odometer = await IRF.vdom.odometer;
+    const wheelDom = await IRF.dom.wheel;
 
     // Speedometer
     class SpeedOmeterControl
@@ -63,11 +66,11 @@
         {
             GM.addStyle(`
 .speedOmeterContainer {
-	width: 70%;
-	height: 25%;
+	width: 300px; // 70%;
+	height: 100px; // 25%;
 	position: absolute;
-	top: 10%;
-	left: 15%;
+	top: 30px; // 10%;
+	left: 35px; // 15%;
     visibility: hidden;
 }
 .speedOmeterContainer canvas{
@@ -95,7 +98,7 @@
             this._speedOmeterElement = document.createElement('span');
             this._speedOmeterContainer.appendChild(speedOmeterCanvas);
             this._speedOmeterContainer.appendChild(this._speedOmeterElement);
-            (await IRF.dom.wheel).prepend(this._speedOmeterContainer);
+            wheelDom.prepend(this._speedOmeterContainer);
 
             var opts = {
                 angle: 0,
@@ -142,7 +145,9 @@
                     return Reflect.apply(target, thisArg, args);;
                 },
             });
-
+            
+            // update position of speedometer
+            this.updatePosition();
         }
 
         update()
@@ -176,12 +181,25 @@
                 this._speedOmeterContainer.style.visibility = 'hidden';
             }
         }
+
+        updatePosition()
+        {
+            if(this._speedOmeterContainer)
+            {
+                this._speedOmeterContainer.style.left = settings.speedometer_left + 'px';
+                this._speedOmeterContainer.style.top = settings.speedometer_top + 'px';
+                this._speedOmeterContainer.style.transform = 'scale(' + settings.speedometer_scale + ')';
+            }
+        }
     };
 
     //
     // Settings
     const settings = {
         "speedometer_enabled": false,
+        "speedometer_scale": 1.0,
+        "speedometer_left": 35,
+        "speedometer_top": 30,
     };
     const storedSettings = await GM.getValues(Object.keys(settings))
     Object.assign(settings, storedSettings);
@@ -192,6 +210,24 @@
     gm_info.script.name = "Speedometer"
     const irf_settings = IRF.ui.panel.createTabFor(gm_info, { tabName: "Speedometer" });
     add_checkbox('Display speedometer', 'speedometer_enabled', () => speedOmeter.update());
+    
+    const header = document.createElement('h3');
+    header.innerText = 'Position';
+    irf_settings.container.appendChild(header);
+    let button = document.createElement('button');
+    button.innerText = 'Reset position';
+    button.addEventListener('click', () => {
+        speedometer_left_element.value = settings.speedometer_left = 35;
+        speedometer_top_element.value = settings.speedometer_top = 30;
+        speedometer_scale_element.value = settings.speedometer_scale = 1.0;
+        GM.setValues(settings);
+        speedOmeter.updatePosition();
+    });
+    irf_settings.container.appendChild(button);
+    irf_settings.container.appendChild(document.createElement('br'));
+    const speedometer_left_element = add_numeric('Left', 'speedometer_left', -1000, 1000, 1, () => speedOmeter.updatePosition());
+    const speedometer_top_element = add_numeric('Top', 'speedometer_top', -1000, 1000, 1, () => speedOmeter.updatePosition());
+    const speedometer_scale_element = add_numeric('Scale', 'speedometer_scale', 0.5, 2, 0.1, () => speedOmeter.updatePosition());
 
     function add_checkbox(name, identifier, callback=undefined, settings_container=irf_settings.container) {
         let label = document.createElement("label");
@@ -217,6 +253,36 @@
         settings_container.appendChild(document.createElement("br"));
 
         return checkbox
+    };
+
+    function add_numeric(name, identifier, min, max, step, callback=undefined, settings_container=irf_settings.container) {
+        let label = document.createElement("label");
+        label.style.display = 'block';
+
+        let text = document.createElement("span");
+        text.innerText = " " + name;
+        label.appendChild(text);
+
+        label.appendChild(document.createElement("br"));
+
+        let input = document.createElement("input");
+        input.id = "speedometer_" + identifier;
+        input.type = "number";
+        input.value = settings[identifier];
+        input.min = min;
+        input.max = max;
+        input.step = step;
+        input.className = IRF.ui.panel.styles.input;
+        label.appendChild(input);
+
+        input.addEventListener("change", () => {
+            settings[identifier] = parseFloat(input.value);
+            GM.setValues(settings);
+            if (callback) callback(parseFloat(input.value));
+        });
+
+        settings_container.appendChild(label);
+        return input;
     };
 
     const speedOmeter = new SpeedOmeterControl();
